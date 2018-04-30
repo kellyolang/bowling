@@ -1,54 +1,59 @@
+<?php 
+    session_start();
+?>
 <!DOCTYPE html>
 <html>
-<head>
-	<title>MySQL Query</title>
-	<link rel ="stylesheet" type="text/css" href="sample.css">
-</head>
+    <head>
+        <meta charset="utf-8">
+        <title>MySQL Query</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="column">
+                    <header>
+                        <h1>10Pin<img src="images/bowling-ball.gif" alt="bowling ball" width="100px" height="100px"></h1>
+                    </header>
+                    <?php
 
-<body>
-<?php
+                    include('config.php');
+                    include('functions/queries.php');
 
-include('config.php');
+                    $connect=mysqli_connect(SERVER, USER, PW, DB);
 
-$connect=mysqli_connect(SERVER, USER, PW, DB);
+                    testConnection($connect);
 
-if( !$connect) 
-{
-	die("ERROR: Cannot connect to database 'DB' on server 'SERVER' 
-	using user name 'USER' (".mysqli_connect_errno().
-	", ".mysqli_connect_error().")");
-}
+                    $userQuery = "SELECT first_name, last_name FROM bowlers ORDER BY last_name ASC"; 
 
-$userQuery = "SELECT first_name, last_name FROM bowlers ORDER BY last_name ASC"; 
+                    $result = mysqli_query($connect, $userQuery);
 
-$result = mysqli_query($connect, $userQuery);
+                    runQuery($result);
 
-if (!$result) 
-{
-	die("Could not successfully run query ($userQuery) from 'DB': " .	
-		mysqli_error($connect) );
-}
+                    if (mysqli_num_rows($result) == 0) 
+                    {
+                        print("No records found with query $userQuery");
+                    }
+                    else 
+                    { 
+                        print("<h1>Bowler Names</h1>");
+                        print("<table class = \"table\">");
+                        print("<tr><th>First Name</th><th>Last Name</th></tr>");
+                        while ($row = mysqli_fetch_assoc($result))
+                        {
+                           print ("<tr><td>".$row['first_name']."</td><td>".$row['last_name']."</td></tr>"); 
+                        }
 
-if (mysqli_num_rows($result) == 0) 
-{
-	print("No records found with query $userQuery");
-}
-else 
-{ 
-	print("<h1>BOWLER NAMES</h1>");
-	print("<table border = \"1\">");
-	print("<tr><th>FIRST NAME</th><th>LAST NAME</th></tr>");
-    while ($row = mysqli_fetch_assoc($result))
-    {
-       print ("<tr><td>".$row['first_name']."</td><td>".$row['last_name']."</td></tr>"); 
-    }
+                        print("</table>");
 
-	print("</table");
-}
+                        echo '<p><a href="logout.php">Logout</a>' . " " . $_SESSION['email'] . '</p>';
+                    }
 
-mysqli_close($connect);
- 
-?>
+                    mysqli_close($connect);
 
-</body>
+                    ?>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

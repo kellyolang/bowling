@@ -3,68 +3,69 @@
 ?>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Bowling Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-    <script src="main.js"></script>
-</head>
-<body>
-<?php 
+    <head>
+        <meta charset="utf-8">
+        <title>Bowling Login</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="column">
+                    <header>
+                        <h1>10Pin<img src="images/bowling-ball.gif" alt="bowling ball" width="100px" height="100px"></h1>
+                    </header>
+                    <main>
+                    <?php 
 
-if(empty($_POST['email']) || empty($_POST['password']) )
-{
-    echo '<p>Please enter a first and last name to login</p>';
-    echo '<p><a href="index.php">Return to login</a></p>';
-}
+                    if(empty($_POST['email']) || empty($_POST['password']) )
+                    {
+                        echo '<p>Please enter a first and last name to login</p>';
+                        echo '<p><a href="index.php">Return to login</a></p>';
+                    }
 
-else
-{
-    $email = $_POST['email'];
-    $pass = $_POST['password'];
+                    else
+                    {
+                        $email = $_POST['email'];
+                        $pass = $_POST['password'];
 
-    include('config.php');
-    $connect = mysqli_connect(SERVER, USER, PW, DB);
+                        include('config.php');
+                        include('functions/queries.php');
 
-    if(!$connect)
-    {
-        exit("Error could not connect to the database.");
-    }
+                        $connect = mysqli_connect(SERVER, USER, PW, DB);
 
-    else
-    {
-        $query = "SELECT email, pass from bowlers WHERE email = '$email' AND pass = '$pass';";
-        $result = mysqli_query($connect, $query); 
-        
-        $row = mysqli_fetch_assoc($result);
+                        testConnection($connect);
 
-    }
-    
-    if(!$result)
-    {
-        exit("<p>Could not successfully run the query, $query</p>");
-    }
+                        $query = "SELECT * from bowlers WHERE email = '$email'"; 
+                        $result = mysqli_query($connect, $query);
 
-    elseif(count($row['email']) == 0)
-    {
-        echo 'No result returned for the query ' . $query;
-    }
+                        $row = mysqli_fetch_assoc($result);
 
-    else
-    {
-        $_SESSION['email'] = $row['email'];
+                        if(count($row['email']) == 0)
+                            echo "<p>No record found with the email $email.</p>";
 
-        echo '<p><a href="logout.php">Logout</a>' . " " . $_SESSION['email'] . '</p>';
-        echo '<p><a href="Show-Bowlers.php">Show Bowlers</a></p>';
+                        else
+                        {
+                            $hash = $row['pass'];
 
-        echo'<p>Test to see the session firstName: '. $_SESSION['email'] . '</p>';
+                            if(password_verify($pass, $hash))
+                            {
+                                $_SESSION['email'] = $row['email'];
+                                $_SESSION['pass'] = $row['pass'];
 
-    }
+                                echo '<p><a href="logout.php">Logout</a>' . " " . $_SESSION['email'] . '</p>';
+                                echo '<p><a href="Show-Bowlers.php">Show Bowlers</a></p>';
 
-}
+                            }
 
-?>
-</body>
+                            else
+                                echo "<p>Passwords do not match.</p>";
+                        }
+                    }
+                    ?>
+                    </main>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
